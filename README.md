@@ -50,10 +50,41 @@ Currently configured with **Gemma3:4b** as the default LLM, but you can easily s
 | **Storage** | 10 GB free | 20 GB free |
 | **Python** | 3.10 | 3.10 |
 
-**Required Software:**
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda
-- [Ollama](https://ollama.com/download) (for local LLM)
-- [Git](https://git-scm.com/download/win) (for CosyVoice submodule)
+---
+
+## ⚠️ Prerequisites (Required)
+
+Before using VoiceForge, you must install the following software:
+
+### 1. Miniconda (Required)
+- **Download**: https://docs.conda.io/en/latest/miniconda.html
+- **Size**: ~50MB
+- **Installation**: Run installer and check "Add to PATH"
+- **Why**: Manages Python environment and dependencies
+
+### 2. Ollama (Required)
+- **Download**: https://ollama.com/download
+- **Size**: ~200MB (plus model files)
+- **Installation**: Run installer
+- **Why**: Runs the local LLM (Gemma3:4b by default)
+
+**Note**: Git is **NOT required** - CosyVoice library is already included in `libs/` folder!
+
+---
+
+## 📋 Installation Flow
+
+```mermaid
+graph TD
+    A[Download VoiceForge] --> B[Install Miniconda]
+    B --> C[Install Ollama]
+    C --> D[Run install.bat]
+    D --> E[Download AI Models]
+    E --> F[Start Using!]
+    
+    style A fill:#e1f5ff
+    style F fill:#d4edda
+```
 
 ---
 

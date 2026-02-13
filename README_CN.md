@@ -51,10 +51,41 @@
 | **硬盘** | 10 GB 可用空间 | 20 GB 可用空间 |
 | **Python** | 3.10 | 3.10 |
 
-**必备软件：**
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html) 或 Anaconda
-- [Ollama](https://ollama.com/download)（用于运行本地大模型）
-- [Git](https://git-scm.com/download/win)（用于 CosyVoice 子模块）
+---
+
+## ⚠️ 前置要求（必须）
+
+使用 VoiceForge 前，必须先安装以下软件：
+
+### 1. Miniconda（必须）
+- **下载**：https://docs.conda.io/en/latest/miniconda.html
+- **大小**：约 50MB
+- **安装**：运行安装程序，勾选"Add to PATH"
+- **作用**：管理 Python 环境和依赖包
+
+### 2. Ollama（必须）
+- **下载**：https://ollama.com/download
+- **大小**：约 200MB（不含模型文件）
+- **安装**：运行安装程序
+- **作用**：运行本地大模型（默认 Gemma3:4b）
+
+**注意**：**无需安装 Git** - CosyVoice 库已包含在 `libs/` 文件夹中！
+
+---
+
+## 📋 安装流程图
+
+```mermaid
+graph TD
+    A[下载 VoiceForge] --> B[安装 Miniconda]
+    B --> C[安装 Ollama]
+    C --> D[运行 install.bat]
+    D --> E[下载 AI 模型]
+    E --> F[开始使用!]
+    
+    style A fill:#e1f5ff
+    style F fill:#d4edda
+```
 
 ---
 

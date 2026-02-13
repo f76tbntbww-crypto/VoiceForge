@@ -1,8 +1,0 @@
-git add .
-git commit -m "Initial release: VoiceForge v1.0.0 - Local AI Voice Assistant
-
-- 100% coded by Kimi-K2.5
-- One-click installer for ASR+LLM+TTS
-- Multi-turn conversation memory
-- Hot-reload configuration
-- Windows-optimized"

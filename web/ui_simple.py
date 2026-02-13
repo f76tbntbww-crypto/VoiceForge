@@ -266,7 +266,7 @@ print("=" * 60)
 # 加载 ASR
 asr_model = None
 if models_config.get("asr", {}).get("enabled", True):
-    print("\n🔄 加载 ASR 模型...")
+    print("\n🔄 加载 ASR 模型 | Loading ASR Model...")
     asr_config = models_config["asr"].copy()
     asr_config["model_path"] = paths_config.get("models", {}).get("asr")
     asr_model = SenseVoiceASR(asr_config)
@@ -275,7 +275,7 @@ if models_config.get("asr", {}).get("enabled", True):
 # 加载 TTS
 tts_model = None
 if models_config.get("tts", {}).get("enabled", True):
-    print("\n🔄 加载 TTS 模型...")
+    print("\n🔄 加载 TTS 模型 | Loading TTS Model...")
     tts_config = models_config["tts"].copy()
     tts_config["model_path"] = paths_config.get("models", {}).get("tts")
     tts_config["cosyvoice_lib"] = paths_config.get("libs", {}).get("cosyvoice")
@@ -292,63 +292,65 @@ if tts_model and tts_model.is_loaded():
         pass
 
 print("\n" + "=" * 60)
-print("✅ 模型加载完成")
-print(f"📝 记忆管理器已启动（最大保留 {chat_memory.max_history} 轮对话）")
+print("✅ 模型加载完成 | Models Loaded")
+print(
+    f"📝 记忆管理器已启动 | Memory Manager Started（最大保留 | Max {chat_memory.max_history} 轮对话 | rounds）"
+)
 print("=" * 60)
 
 # ==================== 功能函数 ====================
 
 
 def speech_to_text(audio_file, language):
-    """语音识别"""
+    """语音识别 | Speech Recognition"""
     if not asr_model or not asr_model.is_loaded():
-        return "错误：ASR模型未加载", ""
+        return "错误 | Error: ASR模型未加载 | ASR model not loaded", ""
 
     if audio_file is None:
-        return "请先上传音频文件", ""
+        return "请先上传音频文件 | Please upload audio file first", ""
 
     try:
         result = asr_model.transcribe(audio_file, language)
         if result.get("success"):
-            return result["text"], f"语言: {result['language']}"
+            return result["text"], f"语言 | Language: {result['language']}"
         else:
-            return f"识别失败: {result.get('error', '')}", ""
+            return f"识别失败 | Recognition failed: {result.get('error', '')}", ""
     except Exception as e:
-        return f"错误: {str(e)}", ""
+        return f"错误 | Error: {str(e)}", ""
 
 
 def text_to_speech(text, voice):
-    """语音合成"""
+    """语音合成 | Text to Speech"""
     if not tts_model or not tts_model.is_loaded():
-        return None, "错误：TTS模型未加载"
+        return None, "错误 | Error: TTS模型未加载 | TTS model not loaded"
 
     if not text.strip():
-        return None, "请输入文本"
+        return None, "请输入文本 | Please enter text"
 
     try:
         audio_path = tts_model.synthesize(text, voice)
-        return audio_path, "合成成功"
+        return audio_path, "合成成功 | Synthesis successful"
     except Exception as e:
-        return None, f"错误: {str(e)}"
+        return None, f"错误 | Error: {str(e)}"
 
 
 def chat_with_ai(session_id: str, message: str, image: str = None) -> str:
     """
-    AI对话（支持图片和多轮记忆）
+    AI对话（支持图片和多轮记忆）| AI Chat (supports image and multi-turn memory)
 
     Args:
-        session_id: 会话ID
-        message: 用户消息
-        image: 图片路径（可选）
+        session_id: 会话ID | Session ID
+        message: 用户消息 | User message
+        image: 图片路径（可选）| Image path (optional)
 
     Returns:
-        AI回复内容
+        AI回复内容 | AI response content
     """
     if not models_config.get("llm", {}).get("enabled", True):
-        return "错误：LLM已禁用"
+        return "错误 | Error: LLM已禁用 | LLM disabled"
 
     if not message.strip() and image is None:
-        return "请输入消息或上传图片"
+        return "请输入消息或上传图片 | Please enter message or upload image"
 
     import requests
 
@@ -384,22 +386,22 @@ def chat_with_ai(session_id: str, message: str, image: str = None) -> str:
 
         if response.status_code == 200:
             data = response.json()
-            ai_response = data.get("message", {}).get("content", "无回复")
+            ai_response = data.get("message", {}).get("content", "无回复 | No response")
 
             # 添加AI回复到记忆
             chat_memory.add(session_id, "assistant", ai_response)
 
             return ai_response
         else:
-            return f"调用失败: HTTP {response.status_code}"
+            return f"调用失败 | Request failed: HTTP {response.status_code}"
     except Exception as e:
-        return f"错误: {str(e)}"
+        return f"错误 | Error: {str(e)}"
 
 
 def update_settings(max_tokens_input, system_prompt_input, max_history_input):
-    """更新设置并保存到配置文件（热更新）"""
+    """更新设置并保存到配置文件（热更新）| Update settings and save to config file (hot-reload)"""
     try:
-        # 更新配置
+        # 更新配置 | Update configuration
         config_manager.set("models.llm.ollama.max_tokens", int(max_tokens_input))
         config_manager.set("models.llm.ollama.system_prompt", system_prompt_input)
 
@@ -407,21 +409,21 @@ def update_settings(max_tokens_input, system_prompt_input, max_history_input):
         global chat_memory
         chat_memory.max_history = int(max_history_input)
 
-        # 保存到文件
+        # 保存到文件 | Save to file
         config_manager.save()
 
         return (
-            f"✅ 设置已更新！\n"
-            f"   • Token限制: {max_tokens_input}\n"
-            f"   • 最大记忆轮数: {max_history_input}\n"
-            f"   • 配置已保存并立即生效"
+            f"✅ 设置已更新 | Settings Updated!\n"
+            f"   • Token限制 | Token Limit: {max_tokens_input}\n"
+            f"   • 最大记忆轮数 | Max Memory Rounds: {max_history_input}\n"
+            f"   • 配置已保存并立即生效 | Config saved and active immediately"
         )
     except Exception as e:
-        return f"❌ 保存失败: {str(e)}"
+        return f"❌ 保存失败 | Save failed: {str(e)}"
 
 
 def get_current_settings():
-    """获取当前设置值（实时读取）"""
+    """获取当前设置值（实时读取）| Get current settings (real-time read)"""
     max_tokens = config_manager.get("models.llm.ollama.max_tokens", 80)
     system_prompt = config_manager.get(
         "models.llm.ollama.system_prompt",
@@ -432,60 +434,79 @@ def get_current_settings():
 
 
 def clear_memory(session_id: str):
-    """清空记忆"""
+    """清空记忆 | Clear Memory"""
     chat_memory.clear(session_id)
     message_count = chat_memory.get_message_count(session_id)
-    return f"🗑️ 记忆已清空（当前会话消息数: {message_count}）", []
+    return (
+        f"🗑️ 记忆已清空 | Memory Cleared（当前会话消息数 | Current session messages: {message_count}）",
+        [],
+    )
 
 
 def get_memory_info(session_id: str):
-    """获取记忆信息"""
+    """获取记忆信息 | Get Memory Info"""
     count = chat_memory.get_message_count(session_id)
     rounds = count // 2  # 每轮包含用户和助手两条消息
     max_rounds = chat_memory.max_history
-    return f"💬 当前对话: {rounds}/{max_rounds} 轮 ({count} 条消息)"
+    return f"💬 当前对话 | Current Chat: {rounds}/{max_rounds} 轮 | rounds ({count} 条消息 | messages)"
 
 
 def complete_pipeline(session_id: str, audio_file, text_input, image_file, voice):
-    """完整流程：语音/文字+图片 → AI回复 → 语音播放"""
+    """完整流程：语音/文字+图片 → AI回复 → 语音播放 | Full Pipeline: Voice/Text+Image → AI → Voice"""
     # 优先使用语音输入，如果没有语音则使用文字输入
     if audio_file is None and not text_input.strip():
-        return None, "请先上传音频文件或输入文字", ""
+        return (
+            None,
+            "请先上传音频文件或输入文字 | Please upload audio or enter text",
+            "",
+        )
 
     try:
-        # Step 1: 获取输入（ASR或直接使用文字）
+        # Step 1: 获取输入（ASR或直接使用文字）| Get input (ASR or text)
         if audio_file is not None:
-            # 使用语音识别
+            # 使用语音识别 | Use speech recognition
             if not asr_model or not asr_model.is_loaded():
-                return None, "错误：ASR模型未加载", ""
+                return None, "错误 | Error: ASR模型未加载 | ASR model not loaded", ""
 
             asr_result = asr_model.transcribe(audio_file, "auto")
             if not asr_result.get("success"):
-                return None, f"识别失败: {asr_result.get('error', '')}", ""
+                return (
+                    None,
+                    f"识别失败 | Recognition failed: {asr_result.get('error', '')}",
+                    "",
+                )
             recognized_text = asr_result["text"]
         else:
-            # 直接使用文字输入
+            # 直接使用文字输入 | Use text input directly
             recognized_text = text_input.strip()
 
-        # Step 2: LLM（支持图片）
+        # Step 2: LLM（支持图片）| LLM (supports image)
         if not models_config.get("llm", {}).get("enabled", True):
-            return None, "错误：LLM已禁用", recognized_text
+            return None, "错误 | Error: LLM已禁用 | LLM disabled", recognized_text
 
         ai_response = chat_with_ai(session_id, recognized_text, image_file)
 
         if ai_response.startswith("错误：") or ai_response.startswith("调用失败："):
-            return None, f"LLM调用失败: {ai_response}", recognized_text
+            return (
+                None,
+                f"LLM调用失败 | LLM request failed: {ai_response}",
+                recognized_text,
+            )
 
         # Step 3: TTS
         if not tts_model or not tts_model.is_loaded():
-            return None, "错误：TTS模型未加载", recognized_text
+            return (
+                None,
+                "错误 | Error: TTS模型未加载 | TTS model not loaded",
+                recognized_text,
+            )
 
         audio_path = tts_model.synthesize(ai_response, voice)
 
         return audio_path, ai_response, recognized_text
 
     except Exception as e:
-        return None, f"错误: {str(e)}", ""
+        return None, f"错误 | Error: {str(e)}", ""
 
 
 # ==================== 创建界面 ====================
@@ -496,42 +517,52 @@ current_max_tokens, current_system_prompt, current_max_history = get_current_set
 # 初始化会话ID（用于记忆管理）
 initial_session_id = chat_memory.create_session()
 
-with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
+with gr.Blocks(title="VoiceForge | 本地AI语音助手") as demo:
     # 隐藏的会话ID存储
     session_id_state = gr.State(value=initial_session_id)
 
     gr.Markdown("""
-    # 🎙️ VoiceForge 本地语音助手
+    # 🎙️ VoiceForge | 本地AI语音助手 | Local AI Voice Assistant
     
     **基于 SenseVoice + CosyVoice + Ollama 的开源语音对话系统**
     
-    完全本地运行，无需联网，保护隐私 | 支持多轮对话记忆
+    **Open Source Voice Assistant powered by SenseVoice + CosyVoice + Ollama**
+    
+    完全本地运行 | Fully Local  ·  无需联网 | No Internet Required  ·  保护隐私 | Privacy Protected
     """)
 
     with gr.Tabs():
-        # Tab 1: 语音识别
-        with gr.Tab("语音识别"):
-            gr.Markdown("### 🎤 上传音频文件进行识别")
+        # Tab 1: 语音识别 | Speech Recognition
+        with gr.Tab("语音识别 | Speech Recognition"):
+            gr.Markdown("### 🎤 语音识别 | Speech Recognition")
             with gr.Row():
                 with gr.Column():
-                    audio_input = gr.Audio(label="上传音频", type="filepath")
+                    audio_input = gr.Audio(
+                        label="上传音频 | Upload Audio", type="filepath"
+                    )
                     language = gr.Dropdown(
-                        label="语言",
+                        label="语言 | Language",
                         choices=[
-                            ("自动检测", "auto"),
-                            ("中文", "zh"),
-                            ("英语", "en"),
-                            ("日语", "ja"),
-                            ("韩语", "ko"),
-                            ("粤语", "yue"),
+                            ("自动检测 | Auto", "auto"),
+                            ("中文 | Chinese", "zh"),
+                            ("英语 | English", "en"),
+                            ("日语 | Japanese", "ja"),
+                            ("韩语 | Korean", "ko"),
+                            ("粤语 | Cantonese", "yue"),
                         ],
                         value="auto",
                     )
-                    btn_stt = gr.Button("开始识别", variant="primary")
+                    btn_stt = gr.Button(
+                        "开始识别 | Start Recognition", variant="primary"
+                    )
 
                 with gr.Column():
-                    text_output = gr.Textbox(label="识别结果", lines=5)
-                    lang_output = gr.Textbox(label="语言信息", interactive=False)
+                    text_output = gr.Textbox(
+                        label="识别结果 | Recognition Result", lines=5
+                    )
+                    lang_output = gr.Textbox(
+                        label="语言信息 | Language Info", interactive=False
+                    )
 
             btn_stt.click(
                 speech_to_text,
@@ -539,24 +570,28 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
                 outputs=[text_output, lang_output],
             )
 
-        # Tab 2: 语音合成
-        with gr.Tab("语音合成"):
-            gr.Markdown("### 🔊 输入文本生成语音")
+        # Tab 2: 语音合成 | Text to Speech
+        with gr.Tab("语音合成 | Text to Speech"):
+            gr.Markdown("### 🔊 语音合成 | Text to Speech")
             with gr.Row():
                 with gr.Column():
                     text_input = gr.Textbox(
-                        label="输入文本", lines=3, placeholder="请输入要合成的文本..."
+                        label="输入文本 | Input Text",
+                        lines=3,
+                        placeholder="请输入要合成的文本... | Enter text to synthesize...",
                     )
                     voice_select = gr.Dropdown(
-                        label="选择音色",
+                        label="选择音色 | Select Voice",
                         choices=voices,
                         value=voices[0] if voices else "中文女",
                     )
-                    btn_tts = gr.Button("生成语音", variant="primary")
+                    btn_tts = gr.Button("生成语音 | Generate Speech", variant="primary")
 
                 with gr.Column():
-                    audio_output = gr.Audio(label="生成的语音", type="filepath")
-                    status_output = gr.Textbox(label="状态", interactive=False)
+                    audio_output = gr.Audio(
+                        label="生成的语音 | Generated Speech", type="filepath"
+                    )
+                    status_output = gr.Textbox(label="状态 | Status", interactive=False)
 
             btn_tts.click(
                 text_to_speech,
@@ -564,44 +599,53 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
                 outputs=[audio_output, status_output],
             )
 
-        # Tab 3: AI对话
-        with gr.Tab("AI对话"):
-            gr.Markdown("### 🤖 与本地大模型对话（支持图片上传和多轮记忆）")
+        # Tab 3: AI对话 | AI Chat
+        with gr.Tab("AI对话 | AI Chat"):
+            gr.Markdown("### 🤖 AI对话 | AI Chat")
+            gr.Markdown(
+                "与本地大模型对话 | Chat with local LLM（支持图片上传和多轮记忆 | Supports image upload and multi-turn memory）"
+            )
 
             # 设置区域
-            with gr.Accordion("⚙️ 对话设置（点击展开）", open=False):
-                gr.Markdown("调整AI回复长度、记忆管理和其他参数")
+            with gr.Accordion(
+                "⚙️ 对话设置 | Chat Settings（点击展开 | Click to expand）", open=False
+            ):
+                gr.Markdown(
+                    "调整AI回复长度、记忆管理和其他参数 | Adjust AI response length, memory management and other parameters"
+                )
                 with gr.Row():
                     with gr.Column():
                         max_tokens_input = gr.Number(
-                            label="Token 限制（回复最大字数）",
+                            label="Token 限制 | Token Limit（回复最大字数 | Max response length）",
                             value=current_max_tokens,
                             minimum=30,
                             maximum=500,
                             step=10,
-                            info="数值越小回复越短，建议80-150",
+                            info="数值越小回复越短，建议80-150 | Smaller value = shorter response, recommended 80-150",
                         )
                         max_history_input = gr.Number(
-                            label="最大记忆轮数",
+                            label="最大记忆轮数 | Max Memory Rounds",
                             value=current_max_history,
                             minimum=1,
                             maximum=20,
                             step=1,
-                            info="保留最近N轮对话",
+                            info="保留最近N轮对话 | Keep last N conversation rounds",
                         )
                     with gr.Column():
                         system_prompt_input = gr.Textbox(
-                            label="AI 行为设定（System Prompt）",
+                            label="AI 行为设定 | AI Behavior（System Prompt）",
                             value=current_system_prompt,
                             lines=3,
-                            info="定义AI的回复风格",
+                            info="定义AI的回复风格 | Define AI response style",
                         )
                 with gr.Row():
-                    save_btn = gr.Button("💾 保存设置", variant="secondary")
-                    clear_btn = gr.Button("🗑️ 清空记忆", variant="stop")
-                settings_status = gr.Textbox(label="状态", interactive=False)
+                    save_btn = gr.Button(
+                        "💾 保存设置 | Save Settings", variant="secondary"
+                    )
+                    clear_btn = gr.Button("🗑️ 清空记忆 | Clear Memory", variant="stop")
+                settings_status = gr.Textbox(label="状态 | Status", interactive=False)
                 memory_info = gr.Textbox(
-                    label="记忆状态",
+                    label="记忆状态 | Memory Status",
                     value=get_memory_info(initial_session_id),
                     interactive=False,
                 )
@@ -616,7 +660,7 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
             with gr.Row():
                 with gr.Column(scale=2):
                     chatbot = gr.Chatbot(
-                        label="对话记录",
+                        label="对话记录 | Chat History",
                         height=400,
                         value=chat_memory.get_display_history(initial_session_id),
                     )
@@ -627,18 +671,21 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
                         outputs=[settings_status, chatbot],
                     )
                     msg_input = gr.Textbox(
-                        label="输入消息", placeholder="输入消息按回车发送..."
+                        label="输入消息 | Input Message",
+                        placeholder="输入消息按回车发送... | Enter message and press Enter...",
                     )
                 with gr.Column(scale=1):
                     image_input = gr.Image(
-                        label="上传图片（可选）", type="filepath", height=300
+                        label="上传图片（可选）| Upload Image (Optional)",
+                        type="filepath",
+                        height=300,
                     )
                     gr.Markdown("""
-                    **使用说明：**
-                    - 💬 仅文字：直接输入消息
-                    - 📷 图文对话：上传图片 + 输入问题
-                    - 🔄 记忆功能：自动保留上下文
-                    - 🗑️ 清空记忆：在设置中点击清空
+                    **使用说明 | Usage:**
+                    - 💬 仅文字 | Text only: 直接输入消息 | Type message directly
+                    - 📷 图文对话 | Image + Text: 上传图片 + 输入问题 | Upload image + type question
+                    - 🔄 记忆功能 | Memory: 自动保留上下文 | Auto-save conversation context
+                    - 🗑️ 清空记忆 | Clear: 在设置中点击清空 | Click Clear Memory in settings
                     """)
 
             def respond(message, image, history, session_id):
@@ -659,38 +706,48 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
                 outputs=[msg_input, chatbot, memory_info],
             )
 
-        # Tab 4: 完整流程
-        with gr.Tab("完整流程"):
-            gr.Markdown("### 🔄 完整语音对话流程（支持图片）")
-            gr.Markdown("语音/文字 → AI理解 → 语音回复")
+        # Tab 4: 完整流程 | Full Pipeline
+        with gr.Tab("完整流程 | Full Pipeline"):
+            gr.Markdown("### 🔄 完整流程 | Full Pipeline")
+            gr.Markdown(
+                "语音/文字 → AI理解 → 语音回复 | Voice/Text → AI Understanding → Voice Response"
+            )
 
             with gr.Row():
                 with gr.Column():
                     complete_audio_input = gr.Audio(
-                        label="🎤 上传语音（可选，优先使用）", type="filepath"
+                        label="🎤 上传语音 | Upload Voice（可选，优先使用 | Optional, priority）",
+                        type="filepath",
                     )
                     complete_text_input = gr.Textbox(
-                        label="✏️ 或直接输入文字",
-                        placeholder="如果不上传语音，请在这里输入文字...",
+                        label="✏️ 或直接输入文字 | Or type text",
+                        placeholder="如果不上传语音，请在这里输入文字... | If no voice, type here...",
                         lines=2,
                     )
                     complete_image_input = gr.Image(
-                        label="📷 上传图片（可选）", type="filepath", height=200
+                        label="📷 上传图片 | Upload Image（可选 | Optional）",
+                        type="filepath",
+                        height=200,
                     )
                     complete_voice = gr.Dropdown(
-                        label="选择回复音色",
+                        label="选择回复音色 | Select Response Voice",
                         choices=voices,
                         value=voices[0] if voices else "中文女",
                     )
-                    btn_complete = gr.Button("开始对话", variant="primary")
+                    btn_complete = gr.Button(
+                        "开始对话 | Start Conversation", variant="primary"
+                    )
 
                 with gr.Column():
                     complete_audio_output = gr.Audio(
-                        label="AI回复语音", type="filepath"
+                        label="AI回复语音 | AI Response Voice", type="filepath"
                     )
-                    complete_text_output = gr.Textbox(label="AI回复文本", lines=2)
+                    complete_text_output = gr.Textbox(
+                        label="AI回复文本 | AI Response Text", lines=2
+                    )
                     complete_asr_output = gr.Textbox(
-                        label="输入内容（语音识别的文字或您输入的文字）", lines=2
+                        label="输入内容 | Input Content（语音识别的文字或您输入的文字 | Voice recognition or your text）",
+                        lines=2,
                     )
 
             btn_complete.click(
@@ -711,7 +768,7 @@ with gr.Blocks(title="VoiceForge - 本地语音助手") as demo:
 
     gr.Markdown(f"""
     ---
-    **VoiceForge** v1.0.0-preview | 会话ID: `{initial_session_id}` | 支持多轮记忆
+    **VoiceForge** v1.0.0-preview | 会话ID | Session ID: `{initial_session_id}` | 支持多轮记忆 | Multi-turn Memory Supported
     """)
 
 # ==================== 启动服务 ====================
@@ -720,10 +777,12 @@ if __name__ == "__main__":
     port = web_config.get("port", 7860)
     share = web_config.get("share", False)
 
-    print(f"\n🌐 启动 Web 界面...")
-    print(f"   地址: http://localhost:{port}")
-    print(f"   会话ID: {initial_session_id}")
-    print(f"   记忆管理: 已启用（最大{chat_memory.max_history}轮）")
-    print("\n按 Ctrl+C 停止服务\n")
+    print(f"\n🌐 启动 Web 界面 | Starting Web Interface...")
+    print(f"   地址 | Address: http://localhost:{port}")
+    print(f"   会话ID | Session ID: {initial_session_id}")
+    print(
+        f"   记忆管理 | Memory Management: 已启用 | Enabled（最大{chat_memory.max_history}轮 | max {chat_memory.max_history} rounds）"
+    )
+    print("\n按 Ctrl+C 停止服务 | Press Ctrl+C to stop\n")
 
     demo.launch(server_name="0.0.0.0", server_port=port, share=share)
