@@ -1,0 +1,102 @@
+system:
+  name: VoiceForge
+  version: 1.0.0-preview
+  description: 本地AI语音对话框架
+  port: 7861
+  debug: false
+  log_level: INFO
+paths:
+  models:
+    asr: "./models/asr/SenseVoiceSmall"
+    tts: "./models/tts/CosyVoice-300M-SFT"
+  libs:
+    cosyvoice: "./libs/CosyVoice"
+models:
+  asr:
+    enabled: true
+    type: sensevoice
+    device: cuda
+    language: auto
+    sensevoice:
+      model_name: SenseVoiceSmall
+      use_itn: true
+  tts:
+    enabled: true
+    type: cosyvoice
+    device: cuda
+    default_voice: 中文女
+    cosyvoice:
+      model_name: CosyVoice-300M-SFT
+      sample_rate: 22050
+  llm:
+    enabled: true
+    type: ollama
+    ollama:
+      url: http://localhost:11434
+      model: gemma3:4b
+      max_tokens: 80
+      temperature: 0.7
+      top_p: 0.9
+      timeout: 60
+      system_prompt: 你必须在限定字数内完整表达。如果内容较长，请精简回答，确保结尾完整、意思清晰。不要说到一半就停止。优先给出核心结论，细节可省略。
+web:
+  enabled: true
+  simple:
+    port: 7860
+    title: VoiceForge - 本地语音助手
+    share: false
+  full:
+    enabled: false
+    port: 7862
+advanced:
+  gpu:
+    memory_fraction: 0.8
+    allow_growth: true
+  audio:
+    input_sample_rate: 16000
+    output_sample_rate: 22050
+    format: wav
+  concurrency:
+    max_workers: 4
+    timeout: 60
+  cache:
+    enabled: true
+    directory: ./cache
+    max_size_mb: 1024
+    ttl: 3600
+plugins:
+  enabled: false
+  directory: ./plugins
+  auto_load: true
+  custom: null
+session:
+  enabled: false
+  max_history: 10
+  persist: false
+  ttl: 3600
+streaming:
+  enabled: false
+  chunk_size: 1024
+  asr_streaming: false
+  tts_streaming: false
+
+# Cloud API fallback (预留功能，当前版本未启用)
+# cloud:
+#   enabled: false
+#   fallback:
+#     openai:
+#       api_key: ''
+#       base_url: https://api.openai.com/v1
+#       model: gpt-3.5-turbo
+
+interruption:
+  enabled: false
+  vad:
+    enabled: true
+    threshold: 0.5
+    min_silence_ms: 500
+wake_word:
+  enabled: false
+  keyword: 你好小助手
+  model: ./models/wake_word
+  sensitivity: 0.7
