@@ -170,13 +170,17 @@ Access: http://localhost:7860
 
 ## 📸 Screenshots
 
-*[Screenshots will be added here]*
+### Main Interface
+![Main Interface](doc/screenshots/main.png)
 
-<!-- 
-![Main Interface](docs/screenshots/main.png)
-![AI Chat](docs/screenshots/chat.png)
-![Voice Synthesis](docs/screenshots/tts.png)
--->
+###  AI Chat
+![AI Chat](doc/screenshots/chat.png)
+
+### Voice Synthesis
+![Voice Synthesis](doc/screenshots/tts.png)
+
+### Full Pipeline
+![Full Pipeline](doc/screenshots/all-in-one.png)
 
 ---
 

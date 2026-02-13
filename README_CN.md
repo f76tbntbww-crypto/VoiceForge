@@ -171,14 +171,17 @@ python scripts\download_models.py
 
 ## 📸 界面预览
 
-*[截图将在此处添加]*
+### 主界面
+![Main Interface](doc/screenshots/main.png)
 
-<!-- 
-![主界面](docs/screenshots/main.png)
-![AI对话](docs/screenshots/chat.png)
-![语音合成](docs/screenshots/tts.png)
--->
+### AI 对话
+![AI Chat](doc/screenshots/chat.png)
 
+### 语音合成
+![Voice Synthesis](doc/screenshots/tts.png)
+
+### 完整流程
+![Full Pipeline](doc/screenshots/all-in-one.png)
 ---
 
 ## 🔧 配置说明
